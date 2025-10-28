@@ -1,67 +1,54 @@
-import { GoogleGenAI, Type } from "@google/genai";
+// Fix: Import 'post' from 'aws-amplify/api' instead of 'API' from 'aws-amplify' for Amplify v6+.
+import { post } from 'aws-amplify/api';
 import { PredictionResponse, NumberAnalysisResponse } from '../types';
 
-// FIX: Initialize GoogleGenAI with apiKey from environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// This is the name you gave your API in `amplify add api`
+const apiName = 'NaijaLottoOracleAPI';
 
-const model = 'gemini-2.5-pro'; // Use a powerful model for analysis
-
-const systemInstruction = "You are the Naija Lotto Oracle, an expert AI that analyzes Nigerian lottery data to predict lucky numbers. You provide your analysis in the persona of a seasoned Lagos bookmaker, using insightful and slightly mysterious language. Your predictions are for entertainment purposes only. Do not reveal you are an AI. Only return the specified JSON object.";
+/**
+ * These functions now make secure, authenticated calls to your AWS Amplify backend.
+ * The backend consists of an API Gateway endpoint that triggers a Lambda function.
+ * The Lambda function is where the actual call to the AI service (Gemini or Bedrock) happens.
+ * Your sensitive API keys are stored securely on the backend, never in the frontend code.
+ */
 
 export const getPredictions = async (
     game: string,
     mode: 'singleYear' | 'allYears',
     year: number
 ): Promise<PredictionResponse> => {
-    
-    const analysisPeriod = mode === 'singleYear' ? `the year ${year}` : 'all available historical data';
-    const prompt = `Analyze the '${game}' lotto game. Considering data from ${analysisPeriod}, predict the 5 most likely numbers to be drawn next. Provide a deep analysis of why these numbers were chosen, considering patterns, frequency, and any other mystical insights you have. The numbers should be between 1 and 90.`;
-
+    const path = '/predictions';
+    const request = {
+        headers: {
+            'Content-Type': 'application/json',
+            // Amplify automatically adds the user's auth token
+        },
+        body: { game, mode, year },
+    };
     try {
-        // FIX: Use ai.models.generateContent to call the Gemini API.
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                // FIX: Define responseSchema to get structured JSON output.
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        predictions: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    number: { type: Type.INTEGER },
-                                    probability: { type: Type.NUMBER }
-                                },
-                                required: ['number', 'probability']
-                            }
-                        },
-                        analysis: {
-                            type: Type.STRING
-                        }
-                    },
-                    required: ['predictions', 'analysis']
-                }
-            }
+        console.log(`Making live API call to POST ${path} with body:`, request.body);
+        // Fix: Use the new 'post' function syntax from Amplify v6+
+        const restOperation = post({
+            apiName,
+            path,
+            options: request,
         });
-        
-        // FIX: Access the 'text' property of the response for the JSON string.
-        const jsonText = response.text;
-        const data = JSON.parse(jsonText);
-        
-        if (!data.predictions || !data.analysis) {
-            throw new Error("Invalid response structure from API.");
-        }
-        
-        return data as PredictionResponse;
-
+        const { body } = await restOperation.response;
+        const response = await body.json();
+        return response as PredictionResponse;
     } catch (error) {
-        console.error("Error fetching predictions from Gemini API:", error);
-        throw new Error("The Oracle is silent... Could not fetch predictions. Please try again later.");
+        console.error("Error calling backend API for predictions:", error);
+        // Fix: Handle the new error response structure from Amplify v6+
+        let errorMessage = "The connection to the Oracle is weak. Please try again.";
+        if ((error as any).response) {
+            try {
+                const errorBody = await (error as any).response.body.json();
+                errorMessage = errorBody.message || errorMessage;
+            } catch (e) {
+                console.error("Failed to parse error response body for predictions:", e);
+            }
+        }
+        throw new Error(errorMessage);
     }
 };
 
@@ -72,43 +59,36 @@ export const analyzeNumber = async (
     mode: 'singleYear' | 'allYears',
     year: number
 ): Promise<NumberAnalysisResponse> => {
-
-    const analysisPeriod = mode === 'singleYear' ? `the year ${year}` : 'all available historical data';
-    const prompt = `Analyze the number ${number} for the '${game}' lotto game, considering data from ${analysisPeriod}. Is this number currently 'Hot' (appearing frequently), 'Cold' (not appearing for a while), 'Overdue' (based on its historical frequency, it should have appeared recently), or 'Neutral'? Provide its total frequency and a bookmaker's insight into its potential.`;
-
+    const path = '/analyze';
+     const request = {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: { game, number, mode, year },
+    };
     try {
-        // FIX: Use ai.models.generateContent for the analysis call.
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                // FIX: Define responseSchema for number analysis.
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        analysis: { type: Type.STRING },
-                        status: { type: Type.STRING, enum: ['Hot', 'Cold', 'Neutral', 'Overdue'] },
-                        frequency: { type: Type.INTEGER }
-                    },
-                    required: ['analysis', 'status', 'frequency']
-                }
-            }
+        console.log(`Making live API call to POST ${path} with body:`, request.body);
+        // Fix: Use the new 'post' function syntax from Amplify v6+
+        const restOperation = post({
+            apiName,
+            path,
+            options: request,
         });
-        
-        // FIX: Access the 'text' property of the response for the JSON string.
-        const jsonText = response.text;
-        const data = JSON.parse(jsonText);
-
-        if (!data.analysis || !data.status || data.frequency === undefined) {
-             throw new Error("Invalid response structure from API for number analysis.");
-        }
-
-        return data as NumberAnalysisResponse;
-
+        const { body } = await restOperation.response;
+        const response = await body.json();
+        return response as NumberAnalysisResponse;
     } catch (error) {
-        console.error("Error fetching number analysis from Gemini API:", error);
-        throw new Error("The Oracle is contemplating... Could not analyze the number. Please try again later.");
+        console.error("Error calling backend API for number analysis:", error);
+        // Fix: Handle the new error response structure from Amplify v6+
+        let errorMessage = "The Oracle is contemplating... Could not analyze the number.";
+        if ((error as any).response) {
+            try {
+                const errorBody = await (error as any).response.body.json();
+                errorMessage = errorBody.message || errorMessage;
+            } catch (e) {
+                console.error("Failed to parse error response body for number analysis:", e);
+            }
+        }
+        throw new Error(errorMessage);
     }
 };

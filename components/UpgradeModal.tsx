@@ -1,29 +1,24 @@
 import React from 'react';
-import { AuthState } from '../types';
 
 interface UpgradeModalProps {
     isVisible: boolean;
     onClose: () => void;
     onUpgrade: () => void;
-    authState: AuthState;
     isTrialOver: boolean;
 }
 
-const UpgradeModal: React.FC<UpgradeModalProps> = ({ isVisible, onClose, onUpgrade, authState, isTrialOver }) => {
+const UpgradeModal: React.FC<UpgradeModalProps> = ({ isVisible, onClose, onUpgrade, isTrialOver }) => {
     if (!isVisible) {
         return null;
     }
-
-    const buttonText = authState === 'guest' ? "Login or Create Account" : "Upgrade Now - $4.99 / Month";
     
-    let title = authState === 'guest' ? "Join to Go PRO!" : "Go PRO!";
+    let title = "Go PRO!";
     let subtitle = "Unlock the full power of the Naija Lotto Oracle.";
 
     if (isTrialOver) {
         title = "Your Free Trial Has Ended";
         subtitle = "Upgrade to continue getting expert predictions and analysis.";
     }
-
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
@@ -60,7 +55,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isVisible, onClose, onUpgra
                         onClick={onUpgrade}
                         className="w-full px-6 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold text-lg rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300"
                     >
-                        {buttonText}
+                        Upgrade Now - $4.99 / Month
                     </button>
                     <button onClick={onClose} className="w-full text-gray-400 hover:text-white transition-colors duration-200 py-2">
                         Maybe Later

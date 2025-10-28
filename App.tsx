@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { withAuthenticator, WithAuthenticatorProps } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+
 import Header from './components/Header';
 import GameSelector from './components/GameSelector';
 import AnalysisModeSelector from './components/AnalysisModeSelector';
@@ -7,21 +10,18 @@ import PredictionDisplay from './components/PredictionDisplay';
 import NumberAnalyzer from './components/NumberAnalyzer';
 import Loader from './components/Loader';
 import UpgradeModal from './components/UpgradeModal';
-import LoginModal from './components/LoginModal';
-import PaymentForm from './components/PaymentForm';
-import { getPredictions, analyzeNumber } from './services/geminiService';
-import { PredictionResponse, NumberAnalysisResponse, AuthState } from './types';
+import { getPredictions, analyzeNumber } from './services/aiService';
+import { PredictionResponse, NumberAnalysisResponse } from './types';
 
-// FIX: Export AnalysisMode type to be used by other components.
 export type AnalysisMode = 'singleYear' | 'allYears';
 
-const App: React.FC = () => {
+const App: React.FC<WithAuthenticatorProps> = ({ signOut, user }) => {
     // State management
-    const [authState, setAuthState] = useState<AuthState>('guest');
-    const [isProUser, setIsProUser] = useState(false);
+    // In a real app, isProUser and trialUsesLeft would be fetched from a backend DB like DynamoDB
+    const [isProUser, setIsProUser] = useState(false); 
     const [trialUsesLeft, setTrialUsesLeft] = useState(3);
     
-    const games = ['Golden Chance', 'Baba Ijebu (Premier)', 'Western Lotto', 'Green Lotto'];
+    const games = ['Golden Chance', 'Premier Star', 'Western Lotto', 'Green Lotto'];
     const [selectedGame, setSelectedGame] = useState(games[0]);
     const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('singleYear');
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -35,19 +35,18 @@ const App: React.FC = () => {
     const [analysisError, setAnalysisError] = useState<string | null>(null);
 
     const [isUpgradeModalVisible, setUpgradeModalVisible] = useState(false);
-    const [isLoginModalVisible, setLoginModalVisible] = useState(false);
-    const [isPaymentFormVisible, setPaymentFormVisible] = useState(false);
     
-    const isTrialOver = authState === 'guest' && trialUsesLeft <= 0;
+    // Guest users don't exist in this model; they are unauthenticated.
+    // The trial is for newly signed-up, non-pro users.
+    const isTrialOver = !isProUser && trialUsesLeft <= 0;
 
     useEffect(() => {
-        // Reset prediction when game/year/mode changes
         setPredictionData(null);
         setPredictionError(null);
     }, [selectedGame, selectedYear, analysisMode]);
 
     const handleGeneratePredictions = async () => {
-        if (isTrialOver) {
+        if (!isProUser && isTrialOver) {
             setUpgradeModalVisible(true);
             return;
         }
@@ -59,7 +58,7 @@ const App: React.FC = () => {
         try {
             const data = await getPredictions(selectedGame, analysisMode, selectedYear);
             setPredictionData(data);
-            if (authState === 'guest') {
+            if (!isProUser) {
                 setTrialUsesLeft(prev => Math.max(0, prev - 1));
             }
         } catch (error) {
@@ -70,6 +69,10 @@ const App: React.FC = () => {
     };
 
     const handleAnalyzeNumber = async (num: number) => {
+        if (!isProUser) {
+            setUpgradeModalVisible(true);
+            return;
+        }
         setIsLoadingAnalysis(true);
         setAnalysisError(null);
         setAnalysisData(null);
@@ -84,29 +87,12 @@ const App: React.FC = () => {
         }
     };
     
-    const handleLoginSuccess = () => {
-        setAuthState('loggedIn');
-        setLoginModalVisible(false);
-        // In a real app, you'd fetch user status (e.g., pro) from a backend
-    };
-    
-    const handleLogout = () => {
-        setAuthState('guest');
-        setIsProUser(false);
-    };
-    
     const handleUpgrade = () => {
-        setUpgradeModalVisible(false);
-        if (authState === 'guest') {
-            setLoginModalVisible(true);
-        } else {
-            setPaymentFormVisible(true);
-        }
-    };
-    
-    const handlePaymentSuccess = () => {
+        // In a real app, this would trigger a payment flow (e.g., Stripe)
+        // On success, the backend would update the user's status in DynamoDB
+        alert("This would open a real payment form (e.g., Stripe). Simulating successful payment.");
         setIsProUser(true);
-        setPaymentFormVisible(false);
+        setUpgradeModalVisible(false);
     };
 
     const handleLockedFeatureClick = () => {
@@ -118,9 +104,9 @@ const App: React.FC = () => {
             <div className="container mx-auto px-4 py-8 flex flex-col items-center">
                 
                 <Header 
-                    authState={authState} 
-                    onLoginClick={() => setLoginModalVisible(true)} 
-                    onLogoutClick={handleLogout} 
+                    user={user}
+                    onLogoutClick={signOut}
+                    isProUser={isProUser}
                     trialUsesLeft={trialUsesLeft}
                 />
 
@@ -179,32 +165,17 @@ const App: React.FC = () => {
                         isProUser={isProUser}
                         onLockClick={handleLockedFeatureClick}
                     />
-
                 </main>
 
                 <UpgradeModal 
                     isVisible={isUpgradeModalVisible}
                     onClose={() => setUpgradeModalVisible(false)}
                     onUpgrade={handleUpgrade}
-                    authState={authState}
                     isTrialOver={isTrialOver}
                 />
-                
-                <LoginModal 
-                    isVisible={isLoginModalVisible}
-                    onClose={() => setLoginModalVisible(false)}
-                    onLoginSuccess={handleLoginSuccess}
-                />
-                
-                <PaymentForm 
-                    isVisible={isPaymentFormVisible}
-                    onClose={() => setPaymentFormVisible(false)}
-                    onPaymentSuccess={handlePaymentSuccess}
-                />
-
             </div>
         </div>
     );
 };
 
-export default App;
+export default withAuthenticator(App);

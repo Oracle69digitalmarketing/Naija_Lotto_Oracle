@@ -1,18 +1,18 @@
 import React from 'react';
-import { AuthState } from '../types';
+import { AuthUser } from 'aws-amplify/auth';
 
 interface HeaderProps {
-    authState: AuthState;
-    onLoginClick: () => void;
-    onLogoutClick: () => void;
+    user?: AuthUser;
+    onLogoutClick?: () => void;
+    isProUser: boolean;
     trialUsesLeft: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ authState, onLoginClick, onLogoutClick, trialUsesLeft }) => {
+const Header: React.FC<HeaderProps> = ({ user, onLogoutClick, isProUser, trialUsesLeft }) => {
     return (
         <header className="w-full flex justify-between items-center">
-            <div className="w-32 text-left">
-                {authState === 'guest' && trialUsesLeft > 0 && (
+            <div className="w-48 text-left">
+                 {user && !isProUser && (
                     <div className="bg-gray-700 text-yellow-300 text-sm font-bold p-2 rounded-lg shadow-md">
                         Trial Uses Left: {trialUsesLeft}
                     </div>
@@ -25,15 +25,14 @@ const Header: React.FC<HeaderProps> = ({ authState, onLoginClick, onLogoutClick,
                 </h1>
                 <p className="mt-2 text-lg text-green-300">Your AI-powered guide to lucky numbers</p>
             </div>
-            <div className="w-32 text-right">
-                {authState === 'guest' ? (
-                    <button onClick={onLoginClick} className="px-4 py-2 bg-yellow-400 text-gray-900 font-bold rounded-full hover:bg-yellow-300 transition-colors">
-                        Login
-                    </button>
-                ) : (
-                    <button onClick={onLogoutClick} className="px-4 py-2 bg-gray-700 text-white font-bold rounded-full hover:bg-gray-600 transition-colors">
-                        Logout
-                    </button>
+            <div className="w-48 text-right flex flex-col items-end gap-2">
+                {user && (
+                    <>
+                        <span className="text-sm text-gray-400 truncate" title={user.signInDetails?.loginId}>{user.signInDetails?.loginId}</span>
+                        <button onClick={onLogoutClick} className="px-4 py-2 bg-gray-700 text-white font-bold rounded-full hover:bg-gray-600 transition-colors text-sm">
+                            Logout
+                        </button>
+                    </>
                 )}
             </div>
         </header>
