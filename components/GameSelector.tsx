@@ -1,38 +1,43 @@
 import React from 'react';
-import ProBadge from './ProBadge';
+import { ProBadge } from './ProBadge';
 
-interface GameSelectorProps {
-    games: string[];
-    selectedGame: string;
-    onSelectGame: (game: string) => void;
-    isProUser: boolean;
+interface Game {
+    name: string;
+    isPro: boolean;
 }
 
-const GameSelector: React.FC<GameSelectorProps> = ({ games, selectedGame, onSelectGame, isProUser }) => {
-    return (
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8">
-            {games.map((game, index) => {
-                const isProGame = index > 0; // The first game is free
-                const isLocked = isProGame && !isProUser;
+interface GameSelectorProps {
+    selectedGame: string;
+    setSelectedGame: (game: string) => void;
+    games: Game[];
+    isProUser: boolean;
+    onLockClick: () => void;
+}
 
-                return (
-                    <button
-                        key={game}
-                        onClick={() => onSelectGame(game)}
-                        disabled={isLocked}
-                        className={`relative px-4 py-2 text-sm sm:text-base font-semibold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 ${
-                            selectedGame === game
-                                ? 'bg-green-500 text-white shadow-lg ring-2 ring-green-400'
-                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        {game}
-                        {isLocked && <div className="absolute -top-2 -right-2"><ProBadge /></div>}
-                    </button>
-                );
-            })}
+export const GameSelector: React.FC<GameSelectorProps> = ({ selectedGame, setSelectedGame, games, isProUser, onLockClick }) => {
+    return (
+        <div className="mb-6">
+            <h2 className="text-xl font-semibold text-yellow-300 mb-3 text-center">Select a Game</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {games.map(game => {
+                    const isLocked = game.isPro && !isProUser;
+                    return (
+                        <button
+                            key={game.name}
+                            onClick={() => (isLocked ? onLockClick() : setSelectedGame(game.name))}
+                            disabled={selectedGame === game.name && !isLocked}
+                            className={`p-3 rounded-lg font-semibold transition duration-300 flex items-center justify-center relative ${
+                                selectedGame === game.name && !isLocked
+                                    ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-300'
+                                    : 'bg-gray-700 hover:bg-gray-600 text-white'
+                            } ${isLocked ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
+                            {game.name}
+                            {isLocked && <ProBadge />}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 };
-
-export default GameSelector;

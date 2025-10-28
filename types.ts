@@ -1,17 +1,17 @@
 export interface Prediction {
-    number: number;
-    probability: number;
+  number: number;
+  probability: number;
 }
 
 export interface PredictionResponse {
-    predictions: Prediction[];
-    analysis: string;
+  predictions: Prediction[];
+  analysis: string;
 }
 
 export interface NumberAnalysisResponse {
-    analysis: string;
-    status: 'Hot' | 'Cold' | 'Neutral' | 'Overdue';
-    frequency: number;
+  analysis: string;
+  status: 'Hot' | 'Cold' | 'Overdue' | 'Neutral';
+  frequency: number;
 }
 
-export type AuthState = 'guest' | 'loggedIn';
+export type AnalysisMode = 'singleYear' | 'allYears';

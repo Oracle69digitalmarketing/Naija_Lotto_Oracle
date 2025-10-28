@@ -1,20 +1,21 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { Amplify } from 'aws-amplify';
-import awsExports from './aws-exports';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Amplify } from "aws-amplify";
+import { Authenticator } from "@aws-amplify/ui-react";
+import App from "./App";
+import awsmobile from "./aws-exports";
 
-// Configure Amplify
-Amplify.configure(awsExports);
+Amplify.configure(awsmobile);
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-    throw new Error("Could not find root element to mount to");
-}
+const container = document.getElementById("root");
+const root = createRoot(container!);
 
-const root = ReactDOM.createRoot(rootElement);
 root.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+  <React.StrictMode>
+    <Authenticator.Provider>
+        <Authenticator>
+            <App />
+        </Authenticator>
+    </Authenticator.Provider>
+  </React.StrictMode>
 );

@@ -1,46 +1,42 @@
 import React from 'react';
-import { AnalysisMode } from '../App';
-import ProBadge from './ProBadge';
+import { ProBadge } from './ProBadge.tsx';
+import type { AnalysisMode } from '../types.ts';
 
 interface AnalysisModeSelectorProps {
-    selectedMode: AnalysisMode;
-    onSelectMode: (mode: AnalysisMode) => void;
+    analysisMode: AnalysisMode;
+    setAnalysisMode: (mode: AnalysisMode) => void;
     isProUser: boolean;
     onLockClick: () => void;
 }
 
-const AnalysisModeSelector: React.FC<AnalysisModeSelectorProps> = ({ selectedMode, onSelectMode, isProUser, onLockClick }) => {
-    const isAllYearsLocked = !isProUser;
+export const AnalysisModeSelector: React.FC<AnalysisModeSelectorProps> = ({ analysisMode, setAnalysisMode, isProUser, onLockClick }) => {
+    const modes = [
+        { id: 'singleYear', label: 'Single Year', isPro: false },
+        { id: 'allYears', label: 'All Years', isPro: true }
+    ];
 
-    const handleModeClick = (mode: AnalysisMode) => {
-        if (mode === 'allYears' && isAllYearsLocked) {
-            onLockClick();
-        } else {
-            onSelectMode(mode);
-        }
-    }
-    
     return (
-        <div className="flex justify-center bg-gray-700 p-1 rounded-full mb-8 max-w-sm mx-auto">
-            <button
-                onClick={() => handleModeClick('singleYear')}
-                className={`w-1/2 py-2 text-sm sm:text-base font-bold rounded-full transition-colors duration-300 focus:outline-none ${
-                    selectedMode === 'singleYear' ? 'bg-green-500 text-white' : 'text-gray-300 hover:bg-gray-600'
-                }`}
-            >
-                Single Year
-            </button>
-            <button
-                onClick={() => handleModeClick('allYears')}
-                disabled={isAllYearsLocked && selectedMode !== 'allYears'}
-                className={`relative w-1/2 py-2 text-sm sm:text-base font-bold rounded-full transition-colors duration-300 focus:outline-none flex items-center justify-center gap-2 ${
-                    selectedMode === 'allYears' ? 'bg-green-500 text-white' : 'text-gray-300 hover:bg-gray-600'
-                } ${isAllYearsLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-                All Years {isAllYearsLocked && <ProBadge />}
-            </button>
+        <div className="mb-6">
+            <h2 className="text-xl font-semibold text-yellow-300 mb-3 text-center">Analysis Mode</h2>
+            <div className="flex bg-gray-800 rounded-lg p-1">
+                {modes.map(mode => {
+                    const isLocked = mode.isPro && !isProUser;
+                    return (
+                        <button
+                            key={mode.id}
+                            onClick={() => (isLocked ? onLockClick() : setAnalysisMode(mode.id as AnalysisMode))}
+                            className={`w-full p-2 rounded-md font-semibold transition duration-300 flex items-center justify-center ${
+                                analysisMode === mode.id && !isLocked
+                                    ? 'bg-yellow-500 text-gray-900'
+                                    : 'text-gray-300 hover:bg-gray-700'
+                            } ${isLocked ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
+                            {mode.label}
+                            {isLocked && <ProBadge />}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 };
-
-export default AnalysisModeSelector;

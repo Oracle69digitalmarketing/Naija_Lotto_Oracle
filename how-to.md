@@ -1,12 +1,12 @@
 # How-To: Deploy Your Live AWS Amplify Backend
 
-This guide provides the step-by-step instructions to create, configure, and deploy the secure serverless backend for the Naija Lotto Oracle application. This will transform the app from a frontend prototype into a fully functional, production-ready system.
+This guide provides the step-by-step instructions to create, configure, and deploy the secure serverless backend for the Naija Lotto Oracle application. This will transform the app from a frontend prototype into a fully functional, production-ready system using a pure AWS stack.
 
 **Prerequisites:**
 1.  An [AWS Account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
 2.  [Node.js](https://nodejs.org/en/download/) installed on your machine.
-3.  The [Amplify CLI](https://docs.amplify.aws/cli/start/install/) installed and configured.
-4.  Your AI Service API Key (either from Google for Gemini or have AWS credentials configured for Amazon Bedrock).
+3.  The [Amplify CLI](https://docs.amplify.aws/cli/start/install/) installed and configured with your AWS credentials.
+4.  Access to Claude 3 Sonnet enabled in [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) in your chosen AWS region.
 
 ---
 
@@ -41,11 +41,11 @@ Next, we'll add user authentication. This command will set up an Amazon Cognito 
 amplify add auth
 ```
 Follow the prompts:
--   **Do you want to use the default authentication and security configuration?** `Default configuration`
+-   **Do you want to use the default authentication and security configuration?** `Default configuration with Social Provider (Federation)`
 -   **How do you want users to be able to sign in?** `Email`
 -   **Do you want to configure advanced settings?** `No, I am done.`
 
-This sets up everything needed for user sign-up, sign-in, and session management. The frontend `withAuthenticator` component will now work with this live service.
+This sets up everything needed for user sign-up, sign-in, and session management.
 
 ---
 
@@ -58,7 +58,7 @@ amplify add api
 ```
 Follow the prompts:
 -   **Please select from one of the below services:** `REST`
--   **Provide a friendly name for your resource:** `NaijaLottoOracleAPI` (This should match the `apiName` in `services/geminiService.ts`)
+-   **Provide a friendly name for your resource:** `NaijaLottoOracleAPI` (This must match the `apiName` in `services/geminiService.ts`)
 -   **Provide a path:** `/predictions`
 -   **Choose a Lambda source:** `Create a new Lambda function`
 -   **Provide a friendly name for your Lambda function:** `lottoPredictor`
@@ -85,121 +85,57 @@ Your API is now configured with two endpoints (`/predictions` and `/analyze`) th
 
 ---
 
-### Step 4: Write the Lambda Function Logic
+### Step 4: Write the Lambda Function Logic (with AWS Bedrock)
 
-Now, we'll replace the "Hello World" code in your Lambda function with the actual AI logic.
+Now, we'll replace the "Hello World" code in your Lambda function with the actual AI logic using Claude 3 Sonnet.
 
 1.  **Navigate to the Lambda folder:**
     ```bash
     cd amplify/backend/function/lottoPredictor/src/
     ```
 
-2.  **Install AI SDK:** You need to add the AI library to your Lambda's dependencies.
-    -   **For Gemini:** `npm install @google/genai`
-    -   **For Claude/Bedrock:** `npm install @aws-sdk/client-bedrock-runtime`
+2.  **Install AWS SDK:** The AWS SDK for Bedrock needs to be a dependency for your function.
+    ```bash
+    npm install @aws-sdk/client-bedrock-runtime
+    ```
 
-3.  **Replace `index.js`:** Open `amplify/backend/function/lottoPredictor/src/index.js` and replace its entire content with the code below. **Choose ONE of the AI options.**
-
-#### Option A: Using Google Gemini (Requires Gemini API Key)
-
-```javascript
-// amplify/backend/function/lottoPredictor/src/index.js
-const { GoogleGenAI, Type } = require('@google/genai');
-
-// Store your key securely in Amplify's environment variables (see Step 5)
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-const generatePrompt = (game, mode, year, number = null) => {
-    const analysisPeriod = mode === 'allYears' ? "using all available historical data" : `focusing on data from the year ${year}`;
-    if (number) { // This is for the /analyze endpoint
-        return `
-            Act as an expert Nigerian lotto bookmaker. A user wants to know about their lucky number: ${number}.
-            Analyze the historical data for the "${game}" lotto, ${analysisPeriod}.
-            
-            Provide a detailed "Bookmaker's Insight" on this number. Your analysis must include:
-            1. Status: Is the number "Hot" (frequent), "Cold" (infrequent), or "Overdue" (statistically due)?
-            2. Frequency: How many times has it appeared in the dataset?
-        `;
-    }
-    // This is for the /predictions endpoint
-    return `
-        Act as an expert Nigerian lotto bookmaker. Analyze the historical data for the "${game}" lotto, ${analysisPeriod}.
-        Your analysis should consider Hot, Cold, and Overdue numbers.
-        Provide the top 5 most likely numbers and a "Bookmaker's Insight" explaining your reasoning.
-    `;
-};
-
-exports.handler = async (event) => {
-    const path = event.path;
-    const body = JSON.parse(event.body);
-    const { game, mode, year, number } = body;
-
-    let responseSchema;
-    if (path === '/analyze') {
-        responseSchema = {
-            type: Type.OBJECT, properties: { analysis: { type: Type.STRING }, status: { type: Type.STRING }, frequency: { type: Type.NUMBER } }, required: ["analysis", "status", "frequency"]
-        };
-    } else { // /predictions
-        responseSchema = {
-            type: Type.OBJECT, properties: { predictions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { number: { type: Type.NUMBER }, probability: { type: Type.NUMBER } }, required: ["number", "probability"] } }, analysis: { type: Type.STRING } }, required: ["predictions", "analysis"]
-        };
-    }
-
-    try {
-        const prompt = generatePrompt(game, mode, year, number);
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: { responseMimeType: "application/json", responseSchema: responseSchema },
-        });
-
-        return {
-            statusCode: 200,
-            headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*" },
-            body: response.text,
-        };
-    } catch (error) {
-        console.error("Error calling AI service:", error);
-        return {
-            statusCode: 500,
-            headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*" },
-            body: JSON.stringify({ message: "Failed to get a response from the Oracle." }),
-        };
-    }
-};
-```
-
-#### Option B: Using AWS Bedrock + Claude 3 Sonnet (Pure AWS Stack)
+3.  **Replace `index.js`:** Open `amplify/backend/function/lottoPredictor/src/index.js` and replace its entire content with the code below.
 
 ```javascript
 // amplify/backend/function/lottoPredictor/src/index.js
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 
-// Bedrock client will use the Lambda's IAM role for permissions (see Step 5)
-const client = new BedrockRuntimeClient({ region: "us-east-1" }); // Or your preferred region
+// The Bedrock client will use the Lambda's IAM role for permissions (see Step 5)
+// Ensure your Lambda is in a region where Claude 3 Sonnet is available, e.g., us-east-1
+const client = new BedrockRuntimeClient({ region: "us-east-1" });
 const modelId = "anthropic.claude-3-sonnet-20240229-v1:0";
 
 const generatePrompt = (game, mode, year, number = null) => {
-    // This function is identical to the Gemini version.
     const analysisPeriod = mode === 'allYears' ? "using all available historical data" : `focusing on data from the year ${year}`;
-    if (number) {
-        return `\n\nHuman: Act as an expert Nigerian lotto bookmaker. A user wants to know about their lucky number: ${number}.
+    
+    // For Claude, the prompt structure is a bit different. We provide a system prompt and user message.
+    let userMessage;
+    let systemPrompt = "You are an expert Nigerian lotto bookmaker. Analyze the provided historical data context and respond ONLY with a valid JSON object matching the requested structure. Do not include any text outside of the JSON object."
+
+    if (number) { // This is for the /analyze endpoint
+        userMessage = `A user wants to know about their lucky number: ${number}.
             Analyze the historical data for the "${game}" lotto, ${analysisPeriod}.
-            Provide a detailed "Bookmaker's Insight" on this number. Your analysis must include:
-            1. Status: Is the number "Hot", "Cold", or "Overdue"?
-            2. Frequency: How many times has it appeared?
             
-            Return ONLY a valid JSON object matching this structure: { "analysis": "...", "status": "...", "frequency": ... }
-            \n\nAssistant:`;
-    }
-    return `\n\nHuman: Act as an expert Nigerian lotto bookmaker. Analyze the historical data for the "${game}" lotto, ${analysisPeriod}.
+            Provide a detailed "Bookmaker's Insight" on this number. Your analysis must include:
+            1. Status: Is the number "Hot" (frequent), "Cold" (infrequent), or "Overdue" (statistically due)?
+            2. Frequency: How many times has it appeared in the dataset?
+            
+            The JSON structure must be: { "analysis": "...", "status": "Hot" | "Cold" | "Overdue" | "Neutral", "frequency": 0 }`;
+    } else { // This is for the /predictions endpoint
+        userMessage = `Analyze the historical data for the "${game}" lotto, ${analysisPeriod}.
         Your analysis should consider Hot, Cold, and Overdue numbers.
         Provide the top 5 most likely numbers and a "Bookmaker's Insight" explaining your reasoning.
-        
-        Return ONLY a valid JSON object matching this structure: { "predictions": [{ "number": ..., "probability": ... }], "analysis": "..." }
-        \n\nAssistant:`;
-};
 
+        The JSON structure must be: { "predictions": [{ "number": 0, "probability": 0.0 }], "analysis": "..." }`;
+    }
+
+    return { systemPrompt, userMessage };
+};
 
 exports.handler = async (event) => {
     try {
@@ -207,23 +143,27 @@ exports.handler = async (event) => {
         const body = JSON.parse(event.body);
         const { game, mode, year, number } = body;
 
-        const prompt = generatePrompt(game, mode, year, number);
+        const { systemPrompt, userMessage } = generatePrompt(game, mode, year, number);
         
-        const bedrockRequest = {
+        const bedrockRequestPayload = {
+            anthropic_version: "bedrock-2023-05-31",
+            max_tokens: 2000,
+            system: systemPrompt,
+            messages: [{ "role": "user", "content": userMessage }]
+        };
+
+        const command = new InvokeModelCommand({
             modelId,
             contentType: "application/json",
             accept: "application/json",
-            body: JSON.stringify({
-                anthropic_version: "bedrock-2023-05-31",
-                max_tokens: 2000,
-                messages: [{ "role": "user", "content": prompt }]
-            })
-        };
-
-        const command = new InvokeModelCommand(bedrockRequest);
+            body: JSON.stringify(bedrockRequestPayload)
+        });
+        
         const apiResponse = await client.send(command);
         const decodedBody = new TextDecoder().decode(apiResponse.body);
         const responseBody = JSON.parse(decodedBody);
+        
+        // The actual JSON content from Claude is in the first content block
         const responseJson = JSON.parse(responseBody.content[0].text);
 
         return {
@@ -237,7 +177,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 500,
             headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*" },
-            body: JSON.stringify({ message: "Failed to get a response from the Oracle." }),
+            body: JSON.stringify({ message: "Failed to get a response from the Oracle via Bedrock." }),
         };
     }
 };
@@ -247,25 +187,17 @@ exports.handler = async (event) => {
 
 ### Step 5: Securely Configure the Lambda Function
 
-We need to give our Lambda function the necessary permissions and secrets.
+The Lambda function needs permission to call the Bedrock service.
 
-1.  **Set Environment Variable (Gemini Only):** If you chose Gemini, you must securely store your API key.
-    ```bash
-    amplify update function
-    ```
-    -   **Select which capability you want to update:** `Environment variables`
-    -   **Enter the environment variable name:** `GEMINI_API_KEY`
-    -   **Enter the environment variable value:** `Paste your_actual_gemini_api_key_here`
-    -   **Do you want to add another environment variable?** `No`
+```bash
+amplify update function
+```
+-   **Select which capability you want to update:** `Resource access permissions`
+-   **Select the category:** `predictions`
+-   **Select the resource:** `bedrock` (If not listed, you may need to add this permission manually via the AWS Console in the Lambda's IAM role)
+-   **Select the operations you want to permit:** `InvokeModel`
 
-2.  **Add Permissions (Bedrock Only):** If you chose Bedrock, the Lambda function needs permission to call the Bedrock service.
-    ```bash
-    amplify update function
-    ```
-    -   **Select which capability you want to update:** `Resource access permissions`
-    -   **Select the category:** `predictions`
-    -   **Select the resource:** `bedrock`
-    -   **Select the operations you want to permit:** `InvokeModel`
+This grants the Lambda function an IAM role that allows it to securely invoke the Claude 3 model in Bedrock without needing any hardcoded API keys.
 
 ---
 
@@ -291,6 +223,6 @@ Your frontend is already configured via `aws-exports.js` to talk to this new bac
 npm start
 ```
 
-When you create an account and click "Get Lucky Numbers", you will be making a live, secure call to your AWS Lambda function, which will then call the AI service and return a real prediction.
+When you create an account and click "Get Lucky Numbers", you will be making a live, secure call to your AWS Lambda function, which will then call Amazon Bedrock to get a real prediction from Claude 3 Sonnet.
 
-**Congratulations! You have a fully deployed, secure, and scalable AI application.**
+**Congratulations! You have a fully deployed, secure, and scalable AI application on a pure AWS stack.**

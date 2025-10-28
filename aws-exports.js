@@ -5,11 +5,24 @@ const awsmobile = {
     "aws_cognito_identity_pool_id": "us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "aws_cognito_region": "us-east-1",
     "aws_user_pools_id": "us-east-1_xxxxxxxxx",
-    "aws_user_pools_web_client_id": "xxxxxxxxxxxxxxxxxxxxxx",
+    "aws_user_pools_web_client_id": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
     "oauth": {},
-    "aws_appsync_graphqlEndpoint": "",
-    "aws_appsync_region": "",
-    "aws_appsync_authenticationType": "AMAZON_COGNITO_USER_POOLS",
+    "aws_cognito_username_attributes": [
+        "EMAIL"
+    ],
+    "aws_cognito_social_providers": [],
+    "aws_cognito_signup_attributes": [
+        "EMAIL"
+    ],
+    "aws_cognito_mfa_configuration": "OFF",
+    "aws_cognito_mfa_types": [],
+    "aws_cognito_password_protection_settings": {
+        "passwordPolicyMinLength": 8,
+        "passwordPolicyCharacters": []
+    },
+    "aws_cognito_verification_mechanisms": [
+        "EMAIL"
+    ],
     "aws_cloud_logic_custom": [
         {
             "name": "NaijaLottoOracleAPI",
@@ -18,5 +31,6 @@ const awsmobile = {
         }
     ]
 };
+
 
 export default awsmobile;

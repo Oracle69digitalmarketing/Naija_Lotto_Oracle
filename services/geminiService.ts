@@ -1,94 +1,65 @@
-// Fix: Import 'post' from 'aws-amplify/api' instead of 'API' from 'aws-amplify' for Amplify v6+.
 import { post } from 'aws-amplify/api';
-import { PredictionResponse, NumberAnalysisResponse } from '../types';
+import type { PredictionResponse, NumberAnalysisResponse, AnalysisMode } from './types';
 
-// This is the name you gave your API in `amplify add api`
 const apiName = 'NaijaLottoOracleAPI';
 
-/**
- * These functions now make secure, authenticated calls to your AWS Amplify backend.
- * The backend consists of an API Gateway endpoint that triggers a Lambda function.
- * The Lambda function is where the actual call to the AI service (Gemini or Bedrock) happens.
- * Your sensitive API keys are stored securely on the backend, never in the frontend code.
- */
-
-export const getPredictions = async (
+export async function getLuckyNumbers(
     game: string,
-    mode: 'singleYear' | 'allYears',
+    mode: AnalysisMode,
     year: number
-): Promise<PredictionResponse> => {
-    const path = '/predictions';
-    const request = {
-        headers: {
-            'Content-Type': 'application/json',
-            // Amplify automatically adds the user's auth token
-        },
-        body: { game, mode, year },
-    };
+): Promise<PredictionResponse> {
     try {
-        console.log(`Making live API call to POST ${path} with body:`, request.body);
-        // Fix: Use the new 'post' function syntax from Amplify v6+
         const restOperation = post({
             apiName,
-            path,
-            options: request,
-        });
-        const { body } = await restOperation.response;
-        const response = await body.json();
-        return response as PredictionResponse;
-    } catch (error) {
-        console.error("Error calling backend API for predictions:", error);
-        // Fix: Handle the new error response structure from Amplify v6+
-        let errorMessage = "The connection to the Oracle is weak. Please try again.";
-        if ((error as any).response) {
-            try {
-                const errorBody = await (error as any).response.body.json();
-                errorMessage = errorBody.message || errorMessage;
-            } catch (e) {
-                console.error("Failed to parse error response body for predictions:", e);
+            path: '/predictions',
+            options: {
+                body: { game, mode, year }
             }
+        });
+
+        const { body } = await restOperation.response;
+        // FIX: Explicitly type `json` as `any` to allow property access for validation.
+        const json: any = await body.json();
+        
+        // Basic validation
+        if (!json.predictions || !json.analysis) {
+             throw new Error("Invalid response structure from AI service.");
         }
-        throw new Error(errorMessage);
+        
+        return json as PredictionResponse;
+    } catch (error: any) {
+        console.error('Error fetching predictions from backend:', error);
+        throw new Error(error.response?.data?.message || 'Failed to get predictions from the Oracle.');
     }
-};
+}
 
-
-export const analyzeNumber = async (
+export async function analyzeSingleNumber(
     game: string,
-    number: number,
-    mode: 'singleYear' | 'allYears',
-    year: number
-): Promise<NumberAnalysisResponse> => {
-    const path = '/analyze';
-     const request = {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: { game, number, mode, year },
-    };
+    mode: AnalysisMode,
+    year: number,
+    number: number
+): Promise<NumberAnalysisResponse> {
     try {
-        console.log(`Making live API call to POST ${path} with body:`, request.body);
-        // Fix: Use the new 'post' function syntax from Amplify v6+
         const restOperation = post({
             apiName,
-            path,
-            options: request,
-        });
-        const { body } = await restOperation.response;
-        const response = await body.json();
-        return response as NumberAnalysisResponse;
-    } catch (error) {
-        console.error("Error calling backend API for number analysis:", error);
-        // Fix: Handle the new error response structure from Amplify v6+
-        let errorMessage = "The Oracle is contemplating... Could not analyze the number.";
-        if ((error as any).response) {
-            try {
-                const errorBody = await (error as any).response.body.json();
-                errorMessage = errorBody.message || errorMessage;
-            } catch (e) {
-                console.error("Failed to parse error response body for number analysis:", e);
+            path: '/analyze',
+            options: {
+                body: { game, mode, year, number }
             }
+        });
+
+        const { body } = await restOperation.response;
+        // FIX: Explicitly type `json` as `any` to allow property access for validation.
+        const json: any = await body.json();
+
+        // Basic validation
+        if (!json.analysis || !json.status || json.frequency === undefined) {
+             throw new Error("Invalid response structure from AI service for analysis.");
         }
-        throw new Error(errorMessage);
+        
+        return json as NumberAnalysisResponse;
+    } catch (error: any) {
+        console.error('Error fetching analysis from backend:', error);
+        throw new Error(error.response?.data?.message || 'Failed to get analysis from the Oracle.');
     }
-};
+}

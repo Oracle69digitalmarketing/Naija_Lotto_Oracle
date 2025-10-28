@@ -1,42 +1,31 @@
 import React from 'react';
-import { AuthUser } from 'aws-amplify/auth';
+import { ProBadge } from './ProBadge';
 
+// Define the expected props, including the user object from Amplify
 interface HeaderProps {
-    user?: AuthUser;
-    onLogoutClick?: () => void;
-    isProUser: boolean;
-    trialUsesLeft: number;
+    user: { username?: string };
+    signOut?: () => void;
+    isPro: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, onLogoutClick, isProUser, trialUsesLeft }) => {
+export const Header: React.FC<HeaderProps> = ({ user, signOut, isPro }) => {
     return (
-        <header className="w-full flex justify-between items-center">
-            <div className="w-48 text-left">
-                 {user && !isProUser && (
-                    <div className="bg-gray-700 text-yellow-300 text-sm font-bold p-2 rounded-lg shadow-md">
-                        Trial Uses Left: {trialUsesLeft}
+        <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-lg">
+            <h1 className="text-xl md:text-2xl font-bold text-yellow-400">🎯 Naija Lotto Oracle</h1>
+            {user && (
+                <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                        <p className="text-sm hidden sm:block">Welcome, {user.username}</p>
+                         {isPro && <span className="text-xs text-yellow-400 font-bold">PRO Member</span>}
                     </div>
-                )}
-            </div>
-            <div className="text-center">
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">
-                    <i className="fas fa-star-of-life mr-3"></i>
-                    Naija Lotto Oracle
-                </h1>
-                <p className="mt-2 text-lg text-green-300">Your AI-powered guide to lucky numbers</p>
-            </div>
-            <div className="w-48 text-right flex flex-col items-end gap-2">
-                {user && (
-                    <>
-                        <span className="text-sm text-gray-400 truncate" title={user.signInDetails?.loginId}>{user.signInDetails?.loginId}</span>
-                        <button onClick={onLogoutClick} className="px-4 py-2 bg-gray-700 text-white font-bold rounded-full hover:bg-gray-600 transition-colors text-sm">
-                            Logout
-                        </button>
-                    </>
-                )}
-            </div>
+                    <button
+                        onClick={signOut}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                    >
+                        Sign Out
+                    </button>
+                </div>
+            )}
         </header>
     );
 };
-
-export default Header;
