@@ -1,0 +1,321 @@
+#!/bin/bash
+
+# ============================================================================
+# DEPLOYMENT INSTRUCTIONS FOR NAIJA LOTTO ORACLE
+# ============================================================================
+# This file contains the step-by-step instructions to deploy your application
+# to AWS using SAM CLI. Run this on your LOCAL MACHINE with AWS credentials.
+# ============================================================================
+
+echo "╔════════════════════════════════════════════════════════════════════════════╗"
+echo "║           NAIJA LOTTO ORACLE - DEPLOYMENT INSTRUCTIONS                    ║"
+echo "║                          AWS Region: eu-central-1                         ║"
+echo "╚════════════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# ============================================================================
+# STEP 0: Prerequisites
+# ============================================================================
+echo "STEP 0: Verifying Prerequisites"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+echo ""
+echo "Required tools:"
+echo "  ☐ AWS CLI 2.x - https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+echo "  ☐ SAM CLI - https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html"
+echo "  ☐ Python 3.12+ - https://www.python.org/downloads/"
+echo "  ☐ Node.js 18+ - https://nodejs.org/"
+echo ""
+
+echo "Check your installation:"
+echo ""
+echo "  1. AWS CLI:"
+echo "     \$ aws --version"
+echo "     Expected: aws-cli/2.x.x"
+echo ""
+echo "  2. SAM CLI:"
+echo "     \$ sam --version"
+echo "     Expected: SAM CLI, version 1.x.x or higher"
+echo ""
+echo "  3. Python:"
+echo "     \$ python3 --version"
+echo "     Expected: Python 3.12.x"
+echo ""
+echo "  4. Node.js:"
+echo "     \$ node --version"
+echo "     Expected: v18.x.x or higher"
+echo ""
+
+# ============================================================================
+# STEP 1: Configure AWS Credentials
+# ============================================================================
+echo ""
+echo "STEP 1: Configure AWS Credentials for eu-central-1"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Option A: Using AWS CLI configuration (Recommended)"
+echo ""
+echo "  \$ aws configure --profile naija-lotto"
+echo ""
+echo "  You will be prompted to enter:"
+echo "    - AWS Access Key ID: <your-access-key-id>"
+echo "    - AWS Secret Access Key: <your-secret-access-key>"
+echo "    - Default region name: eu-central-1"
+echo "    - Default output format: json"
+echo ""
+echo "  Then set your profile:"
+echo "    \$ export AWS_PROFILE=naija-lotto"
+echo ""
+echo "Option B: Using environment variables"
+echo ""
+echo "  \$ export AWS_ACCESS_KEY_ID=<your-access-key-id>"
+echo "  \$ export AWS_SECRET_ACCESS_KEY=<your-secret-access-key>"
+echo "  \$ export AWS_DEFAULT_REGION=eu-central-1"
+echo ""
+
+# ============================================================================
+# STEP 2: Verify Bedrock Access
+# ============================================================================
+echo ""
+echo "STEP 2: Verify Bedrock Model Access"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "You must have access to Claude 3.5 Sonnet in Bedrock:"
+echo ""
+echo "  1. Login to AWS Console: https://console.aws.amazon.com/"
+echo "  2. Navigate to: Bedrock → Model access"
+echo "  3. Region: eu-central-1 (Frankfurt)"
+echo "  4. Click 'Manage model access'"
+echo "  5. Look for 'Anthropic Claude 3.5 Sonnet'"
+echo "  6. Check the checkbox to request access"
+echo "  7. Click 'Save changes'"
+echo "  8. Status should show 'Access granted' (usually instant)"
+echo ""
+echo "Verify with AWS CLI (after configuring credentials):"
+echo "  \$ aws bedrock list-foundation-models --region eu-central-1 --query 'modelSummaries[?contains(modelId, \`claude\`)]' --output table"
+echo ""
+
+# ============================================================================
+# STEP 3: Clone/Download Repository
+# ============================================================================
+echo ""
+echo "STEP 3: Download the Application"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "If you haven't already, clone the repository:"
+echo ""
+echo "  \$ git clone https://github.com/Oracle69digitalmarketing/Naija_Lotto_Oracle.git"
+echo "  \$ cd Naija_Lotto_Oracle"
+echo ""
+
+# ============================================================================
+# STEP 4: Build SAM Application
+# ============================================================================
+echo ""
+echo "STEP 4: Build the SAM Application"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Build the SAM application (this packages everything):"
+echo ""
+echo "  \$ sam build --region eu-central-1"
+echo ""
+echo "Expected output:"
+echo "  Build Succeeded"
+echo "  Built Artifacts  : .aws-sam/build"
+echo "  Built Template   : .aws-sam/build/template.yaml"
+echo ""
+
+# ============================================================================
+# STEP 5: Deploy to AWS
+# ============================================================================
+echo ""
+echo "STEP 5: Deploy to AWS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Option A: AUTOMATED DEPLOYMENT (Recommended)"
+echo ""
+echo "  \$ ./deploy.sh"
+echo ""
+echo "  This script will:"
+echo "    ✓ Verify AWS credentials"
+echo "    ✓ Build SAM application"
+echo "    ✓ Deploy to CloudFormation"
+echo "    ✓ Display API endpoint"
+echo "    ✓ Show next steps"
+echo ""
+echo "Option B: GUIDED DEPLOYMENT"
+echo ""
+echo "  \$ sam deploy --guided --region eu-central-1"
+echo ""
+echo "  When prompted, enter:"
+echo "    Stack Name: naija-lotto-oracle-stack"
+echo "    AWS Region: eu-central-1"
+echo "    Parameter Environment: prod"
+echo "    Confirm changes before deploy: y"
+echo "    Allow SAM CLI to create IAM roles: Y"
+echo ""
+echo "Option C: DIRECT DEPLOYMENT (if already configured)"
+echo ""
+echo "  \$ sam deploy --region eu-central-1 --no-confirm-changeset"
+echo ""
+
+# ============================================================================
+# STEP 6: Get API Endpoint
+# ============================================================================
+echo ""
+echo "STEP 6: Retrieve Your API Endpoint"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "After deployment completes, get your API endpoint:"
+echo ""
+echo "  \$ aws cloudformation describe-stacks \\"
+echo "    --stack-name naija-lotto-oracle-stack \\"
+echo "    --region eu-central-1 \\"
+echo "    --query 'Stacks[0].Outputs' \\"
+echo "    --output json"
+echo ""
+echo "Look for the output with key 'ApiEndpoint'"
+echo "Example: https://abc123def.execute-api.eu-central-1.amazonaws.com/prod"
+echo ""
+
+# ============================================================================
+# STEP 7: Update Frontend Configuration
+# ============================================================================
+echo ""
+echo "STEP 7: Update Frontend Configuration"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Edit aws-exports.js and update the API endpoint:"
+echo ""
+echo "  File: aws-exports.js"
+echo "  Section: aws_cloud_logic_custom"
+echo ""
+echo "  Replace:"
+echo "    \"endpoint\": \"https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod\","
+echo ""
+echo "  With your actual endpoint:"
+echo "    \"endpoint\": \"https://YOUR_API_ID.execute-api.eu-central-1.amazonaws.com/prod\","
+echo ""
+
+# ============================================================================
+# STEP 8: Deploy Frontend
+# ============================================================================
+echo ""
+echo "STEP 8: Deploy Frontend to Hosting"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Build the frontend:"
+echo ""
+echo "  \$ npm install"
+echo "  \$ npm run build"
+echo ""
+echo "You now have a 'dist' folder ready for deployment"
+echo ""
+echo "Deploy to your hosting service:"
+echo ""
+echo "  Option A: AWS S3 + CloudFront"
+echo "    \$ aws s3 mb s3://naija-lotto-frontend"
+echo "    \$ aws s3 sync dist/ s3://naija-lotto-frontend/ --delete"
+echo "    (Then create CloudFront distribution in AWS Console)"
+echo ""
+echo "  Option B: AWS Amplify Hosting"
+echo "    \$ amplify init"
+echo "    \$ amplify add hosting"
+echo "    \$ amplify publish"
+echo ""
+echo "  Option C: Vercel, Netlify, etc."
+echo "    (Connect your GitHub repo and deploy)"
+echo ""
+
+# ============================================================================
+# STEP 9: Test Your Deployment
+# ============================================================================
+echo ""
+echo "STEP 9: Test Your Deployment"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Test the Lambda functions locally (before deployment):"
+echo ""
+echo "  \$ sam local invoke PredictionsFunction -e events/predictions.json"
+echo "  \$ sam local invoke AnalysisFunction -e events/analysis.json"
+echo ""
+echo "Test the API endpoint (after deployment):"
+echo ""
+echo "  \$ curl -X POST https://YOUR_API_ID.execute-api.eu-central-1.amazonaws.com/prod/predictions \\"
+echo "    -H \"Content-Type: application/json\" \\"
+echo "    -d '{\"game\": \"Premier Star\", \"mode\": \"singleYear\", \"year\": 2024}'"
+echo ""
+
+# ============================================================================
+# STEP 10: Monitor Your Deployment
+# ============================================================================
+echo ""
+echo "STEP 10: Monitor Your Deployment"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "View Lambda logs in real-time:"
+echo ""
+echo "  \$ sam logs -n PredictionsFunction --stack-name naija-lotto-oracle-stack -r eu-central-1 --tail"
+echo "  \$ sam logs -n AnalysisFunction --stack-name naija-lotto-oracle-stack -r eu-central-1 --tail"
+echo ""
+echo "View CloudWatch metrics:"
+echo ""
+echo "  AWS Console → CloudWatch → Dashboards"
+echo "  Look for: naija-lotto-oracle-stack"
+echo ""
+
+# ============================================================================
+# Troubleshooting
+# ============================================================================
+echo ""
+echo "TROUBLESHOOTING"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "❌ Error: 'Unable to locate credentials'"
+echo "   → Solution: Run 'aws configure' and set your AWS credentials"
+echo ""
+echo "❌ Error: 'AccessDenied' from Bedrock"
+echo "   → Solution: Enable Claude 3.5 Sonnet in AWS Console → Bedrock → Model access"
+echo ""
+echo "❌ Error: SAM build fails"
+echo "   → Solution: Ensure Python 3.12+ is installed and in PATH"
+echo ""
+echo "❌ Error: Lambda timeout"
+echo "   → Solution: Increase timeout in template.yaml (line 7: Timeout: 300)"
+echo ""
+echo "❌ Error: CORS errors from frontend"
+echo "   → Solution: Verify aws-exports.js has correct API endpoint"
+echo ""
+
+# ============================================================================
+# Quick Reference
+# ============================================================================
+echo ""
+echo "QUICK REFERENCE"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Configure Credentials:"
+echo "  \$ aws configure --profile naija-lotto"
+echo ""
+echo "Build Application:"
+echo "  \$ sam build --region eu-central-1"
+echo ""
+echo "Deploy to AWS:"
+echo "  \$ ./deploy.sh"
+echo ""
+echo "View Logs:"
+echo "  \$ sam logs -n PredictionsFunction --stack-name naija-lotto-oracle-stack -r eu-central-1"
+echo ""
+echo "Delete Stack (cleanup):"
+echo "  \$ aws cloudformation delete-stack --stack-name naija-lotto-oracle-stack --region eu-central-1"
+echo ""
+
+echo ""
+echo "╔════════════════════════════════════════════════════════════════════════════╗"
+echo "║                    READY TO DEPLOY!                                       ║"
+echo "║                                                                            ║"
+echo "║  All code is built and tested. Follow the steps above to deploy.           ║"
+echo "║                                                                            ║"
+echo "║  Next: Run 'aws configure' then './deploy.sh'                             ║"
+echo "╚════════════════════════════════════════════════════════════════════════════╝"
+echo ""

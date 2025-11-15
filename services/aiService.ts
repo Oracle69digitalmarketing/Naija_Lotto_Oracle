@@ -1,5 +1,5 @@
 import { post } from 'aws-amplify/api';
-import type { PredictionResponse, NumberAnalysisResponse, AnalysisMode } from './types';
+import type { PredictionResponse, NumberAnalysisResponse, AnalysisMode } from '../types';
 
 const apiName = 'NaijaLottoOracleAPI';
 

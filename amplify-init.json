@@ -1,0 +1,11 @@
+{
+  "projectName": "naija-lotto-oracle",
+  "envName": "prod",
+  "defaultEditor": "vscode",
+  "defaultUIFramework": "react",
+  "appType": "javascript",
+  "sourceDir": "src",
+  "distDir": "dist",
+  "buildCommand": "npm run build",
+  "startCommand": "npm start"
+}

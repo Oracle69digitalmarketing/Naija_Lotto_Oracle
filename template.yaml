@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Naija Lotto Oracle - Full Stack AI Application using AWS Bedrock Claude Sonnet 4.5
+
+Globals:
+  Function:
+    Timeout: 120
+    MemorySize: 512
+    Runtime: python3.12
+    Environment:
+      Variables:
+        BEDROCK_MODEL_ID: claude-3-5-sonnet-20241022
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment for deployment
+
+Resources:
+  # ========== API Gateway ==========
+  NaijaLottoOracleAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Sub 'arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/us-east-1_xxxxxxxxx'
+      Cors:
+        AllowMethods: "'POST, OPTIONS'"
+        AllowHeaders: "'Content-Type, Authorization'"
+        AllowOrigin: "'*'"
+
+  # ========== Lambda Function for Predictions ==========
+  PredictionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'naija-lotto-predictions-${Environment}'
+      CodeUri: backend/predictions/
+      Handler: app.lambda_handler
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'bedrock:InvokeModel'
+              Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::model/anthropic.claude-3-5-sonnet-20241022-v2:0'
+            - Effect: Allow
+              Action:
+                - 'logs:CreateLogGroup'
+                - 'logs:CreateLogStream'
+                - 'logs:PutLogEvents'
+              Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
+      Events:
+        PredictionsAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NaijaLottoOracleAPI
+            Path: /predictions
+            Method: POST
+
+  # ========== Lambda Function for Analysis ==========
+  AnalysisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'naija-lotto-analysis-${Environment}'
+      CodeUri: backend/analysis/
+      Handler: app.lambda_handler
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'bedrock:InvokeModel'
+              Resource: !Sub 'arn:aws:bedrock:${AWS::Region}::model/anthropic.claude-3-5-sonnet-20241022-v2:0'
+            - Effect: Allow
+              Action:
+                - 'logs:CreateLogGroup'
+                - 'logs:CreateLogStream'
+                - 'logs:PutLogEvents'
+              Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
+      Events:
+        AnalysisAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NaijaLottoOracleAPI
+            Path: /analyze
+            Method: POST
+
+  # ========== DynamoDB Table for Caching Results ==========
+  PredictionsCacheTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'naija-lotto-predictions-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: game
+          AttributeType: S
+        - AttributeName: year
+          AttributeType: N
+      KeySchema:
+        - AttributeName: game
+          KeyType: HASH
+        - AttributeName: year
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: expiration
+        Enabled: true
+
+Outputs:
+  APIEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${NaijaLottoOracleAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+  PredictionsFunctionArn:
+    Description: Predictions Lambda Function ARN
+    Value: !GetAtt PredictionsFunction.Arn
+  AnalysisFunctionArn:
+    Description: Analysis Lambda Function ARN
+    Value: !GetAtt AnalysisFunction.Arn
+  PredictionsCacheTableName:
+    Description: DynamoDB Cache Table Name
+    Value: !Ref PredictionsCacheTable

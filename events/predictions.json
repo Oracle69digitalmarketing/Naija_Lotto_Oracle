@@ -1,0 +1,8 @@
+{
+  "body": "{\"game\": \"Premier Star\", \"mode\": \"singleYear\", \"year\": 2024}",
+  "httpMethod": "POST",
+  "path": "/predictions",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
