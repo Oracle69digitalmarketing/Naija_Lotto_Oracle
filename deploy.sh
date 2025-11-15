@@ -88,6 +88,7 @@ echo ""
 sam deploy \
     --region $REGION \
     --stack-name $STACK_NAME \
+    --resolve-s3 \
     --parameter-overrides Environment=$ENVIRONMENT \
     --capabilities CAPABILITY_IAM \
     --no-confirm-changeset
