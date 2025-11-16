@@ -1,0 +1,7 @@
+{
+  "prod": {
+    "configLevel": "project",
+    "useProfile": false,
+    "awsConfigFilePath": "/home/jules/.amplify/awscloudformation/OTc4OYZ2SW"
+  }
+}
