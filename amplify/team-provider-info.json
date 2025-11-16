@@ -19,5 +19,12 @@
         }
       }
     }
+  },
+  "prod": {
+    "categories": {
+      "auth": {
+        "naijalottooracle1c751f03": {}
+      }
+    }
   }
 }
