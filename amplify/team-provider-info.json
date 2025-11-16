@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-naijalottooracle-dev-4507b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-dev-4507b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-dev-4507b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-naijalottooracle-dev-4507b-deployment",
+      "UnauthRoleName": "amplify-naijalottooracle-dev-4507b-unauthRole",
+      "StackName": "amplify-naijalottooracle-dev-4507b",
+      "StackId": "arn:aws:cloudformation:us-east-1:114501972554:stack/amplify-naijalottooracle-dev-4507b/24af14e0-c2d2-11f0-94eb-0ed52ee204bd",
+      "AmplifyAppId": "d1a64liynm4323"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d1a64liynm4323",
+          "type": "manual"
+        }
+      }
+    }
+  }
+}
