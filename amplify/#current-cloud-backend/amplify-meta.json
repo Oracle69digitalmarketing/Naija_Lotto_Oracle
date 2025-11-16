@@ -1,0 +1,15 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-naijalottooracle-prod-75bc3-authRole",
+      "UnauthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-prod-75bc3-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-prod-75bc3-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-naijalottooracle-prod-75bc3-deployment",
+      "UnauthRoleName": "amplify-naijalottooracle-prod-75bc3-unauthRole",
+      "StackName": "amplify-naijalottooracle-prod-75bc3",
+      "StackId": "arn:aws:cloudformation:eu-central-1:114501972554:stack/amplify-naijalottooracle-prod-75bc3/75f28780-c27b-11f0-9cf4-0adb8f59cc39",
+      "AmplifyAppId": "d18yqau8wconuv"
+    }
+  }
+}
