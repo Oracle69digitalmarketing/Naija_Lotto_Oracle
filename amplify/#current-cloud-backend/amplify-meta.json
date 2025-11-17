@@ -1,15 +1,63 @@
 {
   "providers": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-naijalottooracle-prod-75bc3-authRole",
-      "UnauthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-prod-75bc3-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-prod-75bc3-authRole",
+      "AuthRoleName": "amplify-naijalottooracle-dev-a5d8e-authRole",
+      "UnauthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-dev-a5d8e-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-dev-a5d8e-authRole",
       "Region": "eu-central-1",
-      "DeploymentBucketName": "amplify-naijalottooracle-prod-75bc3-deployment",
-      "UnauthRoleName": "amplify-naijalottooracle-prod-75bc3-unauthRole",
-      "StackName": "amplify-naijalottooracle-prod-75bc3",
-      "StackId": "arn:aws:cloudformation:eu-central-1:114501972554:stack/amplify-naijalottooracle-prod-75bc3/75f28780-c27b-11f0-9cf4-0adb8f59cc39",
-      "AmplifyAppId": "d18yqau8wconuv"
+      "DeploymentBucketName": "amplify-naijalottooracle-dev-a5d8e-deployment",
+      "UnauthRoleName": "amplify-naijalottooracle-dev-a5d8e-unauthRole",
+      "StackName": "amplify-naijalottooracle-dev-a5d8e",
+      "StackId": "arn:aws:cloudformation:eu-central-1:114501972554:stack/amplify-naijalottooracle-dev-a5d8e/97053360-c2f2-11f0-a919-0291b039356d",
+      "AmplifyAppId": "d3h4kksl3u7kln"
+    }
+  },
+  "auth": {
+    "naijalottooracle1c751f03": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "output": {
+        "UserPoolId": "eu-central-1_shfxUsPof",
+        "AppClientIDWeb": "20vlo184b5m3vlshtcrkdin01t",
+        "AppClientID": "1e0vibjp2miu0c506ejr8tcch4",
+        "IdentityPoolId": "eu-central-1:6832a6da-daa3-4917-b521-6e079fb90367",
+        "UserPoolArn": "arn:aws:cognito-idp:eu-central-1:114501972554:userpool/eu-central-1_shfxUsPof",
+        "IdentityPoolName": "naijalottooracle1c751f03_identitypool_1c751f03__dev",
+        "UserPoolName": "naijalottooracle1c751f03_userpool_1c751f03"
+      },
+      "lastPushTimeStamp": "2025-11-17T11:39:21.588Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-naijalottooracle-dev-a5d8e-deployment/amplify-cfn-templates/auth/naijalottooracle1c751f03-cloudformation-template.json",
+        "logicalId": "authnaijalottooracle1c751f03"
+      },
+      "lastPushDirHash": "i/uCPrPRPoR3UCBLmu1OEqPsgso="
+    }
+  },
+  "hosting": {
+    "amplifyhosting": {
+      "lastPushTimeStamp": "2025-11-16T13:56:09.606Z",
+      "service": "amplifyhosting",
+      "type": "cicd"
     }
   }
 }

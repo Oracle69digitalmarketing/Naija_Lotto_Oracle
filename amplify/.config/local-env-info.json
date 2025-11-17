@@ -1,5 +1,5 @@
 {
-  "projectPath": "/app",
+  "projectPath": "/workspaces/Naija_Lotto_Oracle",
   "defaultEditor": "Visual Studio Code",
-  "envName": "prod"
+  "envName": "dev"
 }

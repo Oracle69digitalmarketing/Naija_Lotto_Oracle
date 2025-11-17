@@ -17,6 +17,9 @@
           "appId": "d3h4kksl3u7kln",
           "type": "cicd"
         }
+      },
+      "auth": {
+        "naijalottooracle1c751f03": {}
       }
     }
   },
@@ -25,6 +28,7 @@
       "auth": {
         "naijalottooracle1c751f03": {}
       }
-    }
+    },
+    "awscloudformation": {}
   }
 }
