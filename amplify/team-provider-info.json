@@ -1,34 +1,15 @@
 {
-  "dev": {
+  "main": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-naijalottooracle-dev-a5d8e-authRole",
-      "UnauthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-dev-a5d8e-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-dev-a5d8e-authRole",
+      "AuthRoleName": "amplify-naijalottooracle-main-67f35-authRole",
+      "UnauthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-main-67f35-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::114501972554:role/amplify-naijalottooracle-main-67f35-authRole",
       "Region": "eu-central-1",
-      "DeploymentBucketName": "amplify-naijalottooracle-dev-a5d8e-deployment",
-      "UnauthRoleName": "amplify-naijalottooracle-dev-a5d8e-unauthRole",
-      "StackName": "amplify-naijalottooracle-dev-a5d8e",
-      "StackId": "arn:aws:cloudformation:eu-central-1:114501972554:stack/amplify-naijalottooracle-dev-a5d8e/97053360-c2f2-11f0-a919-0291b039356d",
-      "AmplifyAppId": "d3h4kksl3u7kln"
-    },
-    "categories": {
-      "hosting": {
-        "amplifyhosting": {
-          "appId": "d3h4kksl3u7kln",
-          "type": "cicd"
-        }
-      },
-      "auth": {
-        "naijalottooracle1c751f03": {}
-      }
+      "DeploymentBucketName": "amplify-naijalottooracle-main-67f35-deployment",
+      "UnauthRoleName": "amplify-naijalottooracle-main-67f35-unauthRole",
+      "StackName": "amplify-naijalottooracle-main-67f35",
+      "StackId": "arn:aws:cloudformation:eu-central-1:114501972554:stack/amplify-naijalottooracle-main-67f35/12170a70-c554-11f0-a9b6-0297953e09cd",
+      "AmplifyAppId": "d22rc2rn1xvlfr"
     }
-  },
-  "prod": {
-    "categories": {
-      "auth": {
-        "naijalottooracle1c751f03": {}
-      }
-    },
-    "awscloudformation": {}
   }
 }

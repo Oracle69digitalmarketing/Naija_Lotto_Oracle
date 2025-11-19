@@ -1,12 +1,7 @@
 {
-  "prod": {
+  "main": {
     "configLevel": "project",
     "useProfile": false,
-    "awsConfigFilePath": "/home/jules/.amplify/awscloudformation/OTc4OYZ2SW"
-  },
-  "dev": {
-    "configLevel": "project",
-    "useProfile": false,
-    "awsConfigFilePath": "/home/codespace/.amplify/awscloudformation/J2i0OJyJ8v"
+    "awsConfigFilePath": "/home/codespace/.amplify/awscloudformation/gZ6tTOLA0t"
   }
 }
