@@ -9,7 +9,7 @@ Globals:
     Runtime: python3.12
     Environment:
       Variables:
-        BEDROCK_MODEL_ID: anthropic.claude-sonnet-4-5-20250929-v1:0
+        BEDROCK_MODEL_ID: claude-3-5-sonnet-20241022
 Parameters:
   Environment:
     Type: String
