@@ -45,3 +45,5 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 .aws-sam
+.aws-sam
+dist_amplify_deploy.zip
